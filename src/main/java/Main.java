@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
@@ -7,7 +5,7 @@ public class Main {
         final int s = 3;
 
         /* Generating polynom */
-        var genPolynom = Code.stringToArray("10100110111");
+        var genPolynom = Code.stringToArray("111010001");
         System.out.println("Code (" + n + ", " + (n - genPolynom.length + 1) + "): " + Code.arrayToString(genPolynom));
 
         /* Generating matrix */
@@ -21,5 +19,11 @@ public class Main {
         System.out.println("Source message: " + message);
 
         System.out.println("Encoded message: " + Code.arrayToString(Code.encode(Code.stringToArray(message), genMatrix)));
+
+        /* Countring  G^ */
+        var Gline = MatrixWorker.computeGline(genMatrix);
+
+        System.out.println("G^: ");
+        System.out.println(Code.genMtoString(Gline));
     }
 }

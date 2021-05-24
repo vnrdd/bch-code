@@ -36,7 +36,6 @@ public class Code {
         while(bufRow[0] != 1) {
             bufRow = Shifter.leftShift(bufRow, shift);
             result.add(bufRow);
-            ++shift;
         }
 
         return result;
