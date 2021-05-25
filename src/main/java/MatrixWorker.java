@@ -16,7 +16,7 @@ public class MatrixWorker {
         int rank = Integer.MIN_VALUE;
         boolean invertFlag = false;
 
-        while (rank != G.size() && (determinant(result) == 0) || !invertFlag) {
+        while (rank != G.size() || (determinant(result) == 0) || !invertFlag) {
             result = new ArrayList<>();
             var randomized = new ArrayList<Integer>();
             invertFlag = false;
