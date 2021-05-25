@@ -1,5 +1,9 @@
+import org.la4j.LinearAlgebra;
+import org.la4j.Matrix;
+import org.la4j.inversion.MatrixInverter;
+import org.la4j.matrix.dense.Basic2DMatrix;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -8,9 +12,9 @@ public class MatrixWorker {
     /* Counting G^ with determinant == k */
     public static List<int[]> computeGline(List<int[]> G) {
         var result = new ArrayList<int[]>();
-        int determinant = Integer.MIN_VALUE;
+        int rank = Integer.MIN_VALUE;
 
-        while (determinant != G.size()) {
+        while (rank != G.size() && determinant(result) == 0) {
             result = new ArrayList<>();
             var randomized = new ArrayList<Integer>();
 
@@ -30,7 +34,7 @@ public class MatrixWorker {
                 result.add(bufRow);
             }
 
-            determinant = MatrixWorker.rankOfMatrix(result);
+            rank = MatrixWorker.rankOfMatrix(result);
         }
         return result;
     }
@@ -87,5 +91,43 @@ public class MatrixWorker {
         }
 
         return rank;
+    }
+
+    /* Matrix invertion */
+    public static List<int[]> invert(List<int[]> matrix) {
+        var result = new ArrayList<int[]>();
+
+        Matrix source = new Basic2DMatrix(convertTo2DdoubleArray(matrix));
+        Matrix inverted = source.withInverter(LinearAlgebra.InverterFactory.GAUSS_JORDAN).inverse();
+
+       for(int i = 0; i < matrix.size(); ++i) {
+           int[] bufRow = new int[matrix.get(0).length];
+           for(int j = 0; j < matrix.get(i).length; ++j)
+               bufRow[j] = ((int)inverted.get(i, j) + 2) % 2;
+           result.add(bufRow);
+       }
+
+       return result;
+    }
+
+    /* List<int> matrix to double[][]*/
+    public static double[][] convertTo2DdoubleArray(List<int[]> matrix) {
+        double[][] result = new double[matrix.size()][matrix.get(0).length];
+
+        for(int i = 0; i < result.length; ++i) {
+            for(int j = 0; j < result[0].length; ++j)
+                result[i][j] = matrix.get(i)[j];
+        }
+
+        return result;
+    }
+
+    /* Calculate determinant */
+    public static int determinant(List<int[]> matrix) {
+        if(matrix.size() == 0)
+            return 0;
+
+        Matrix a = new Basic2DMatrix(convertTo2DdoubleArray(matrix));
+        return (int)a.determinant();
     }
 }

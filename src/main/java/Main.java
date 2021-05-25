@@ -23,9 +23,15 @@ public class Main {
         /* Countring  G^ */
         var Gline = MatrixWorker.computeGline(genMatrix);
 
-        System.out.println("G^: ");
+        System.out.println("\nG^: ");
         System.out.println(Code.genMtoString(Gline));
 
-        System.out.println(MatrixWorker.rankOfMatrix(Gline));
+        System.out.println("\nDeterminant: " + MatrixWorker.determinant(Gline));
+        System.out.println("Rank: " + MatrixWorker.rankOfMatrix(Gline));
+
+        /* Inverting G^ */
+        var GlineInverted = MatrixWorker.invert(Gline);
+        System.out.println("\nInverted G^: ");
+        System.out.println(Code.genMtoString(GlineInverted));
     }
 }

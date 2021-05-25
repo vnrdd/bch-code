@@ -7,7 +7,7 @@ public class Code {
     public static int[] stringToArray(String polynom) {
         int[] result = new int[polynom.length()];
 
-        for(int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i)
             result[i] = (int) Integer.parseInt(String.valueOf(polynom.charAt(i)));
 
         return result;
@@ -17,7 +17,7 @@ public class Code {
     public static String arrayToString(int[] polynom) {
         StringBuilder sb = new StringBuilder();
 
-        for(int member : polynom)
+        for (int member : polynom)
             sb.append(member);
 
         return sb.toString();
@@ -33,7 +33,7 @@ public class Code {
         result.add(bufRow);
 
         int shift = 1;
-        while(bufRow[0] != 1) {
+        while (bufRow[0] != 1) {
             bufRow = Shifter.leftShift(bufRow, shift);
             result.add(bufRow);
         }
@@ -44,8 +44,13 @@ public class Code {
     public static String genMtoString(List<int[]> genM) {
         StringBuilder sb = new StringBuilder();
 
-        for(int[] row : genM)
-            sb.append("[").append(Code.arrayToString(row)).append("]\n");
+        for (int[] row : genM) {
+            sb.append("[");
+            for (int i : row)
+                sb.append(i).append("  ");
+            sb.delete(sb.length() - 2, sb.length() - 1);
+            sb.append("]\n");
+        }
 
         return sb.toString();
     }
@@ -53,7 +58,7 @@ public class Code {
     public static int[] xor(int[] first, int[] second) {
         int[] result = new int[first.length];
 
-        for(int bit = 0; bit < first.length; ++bit)
+        for (int bit = 0; bit < first.length; ++bit)
             result[bit] = (int) ((first[bit] + second[bit]) % 2);
 
         return result;
@@ -62,8 +67,8 @@ public class Code {
     public static int[] encode(int[] message, List<int[]> genM) {
         int[] res = new int[genM.get(0).length];
 
-        for(int bit = 0; bit < message.length; ++bit) {
-            if(message[bit] == 1)
+        for (int bit = 0; bit < message.length; ++bit) {
+            if (message[bit] == 1)
                 res = Code.xor(res, genM.get(bit));
         }
 
