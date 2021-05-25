@@ -6,25 +6,25 @@ public class Main {
 
         /* Generating polynom */
         var genPolynom = Code.stringToArray("111010001");
-        System.out.println("Code (" + n + ", " + (n - genPolynom.length + 1) + "): " + Code.arrayToString(genPolynom));
+        System.out.println("Code (" + n + ", " + (n - genPolynom.length + 1) + "): " + Utils.arrayToString(genPolynom));
 
         /* Generating matrix */
         var genMatrix = Code.buildGenMatrix(genPolynom, n);
 
         System.out.println("\nGenerating matrix:");
-        System.out.println(Code.genMtoString(genMatrix));
+        System.out.println(Utils.matrixToString(genMatrix));
 
         /* Coding */
         var message = "11001";
         System.out.println("Source message: " + message);
 
-        System.out.println("Encoded message: " + Code.arrayToString(Code.encode(Code.stringToArray(message), genMatrix)));
+        System.out.println("Encoded message: " + Utils.arrayToString(Code.encode(Code.stringToArray(message), genMatrix)));
 
         /* Countring  G^ */
         var Gline = MatrixWorker.computeGline(genMatrix);
 
         System.out.println("\nG^: ");
-        System.out.println(Code.genMtoString(Gline));
+        System.out.println(Utils.matrixToString(Gline));
 
         System.out.println("\nDeterminant: " + MatrixWorker.determinant(Gline));
         System.out.println("Rank: " + MatrixWorker.rankOfMatrix(Gline));
@@ -32,6 +32,6 @@ public class Main {
         /* Inverting G^ */
         var GlineInverted = MatrixWorker.invert(Gline);
         System.out.println("\nInverted G^: ");
-        System.out.println(Code.genMtoString(GlineInverted));
+        System.out.println(Utils.matrixToString(GlineInverted));
     }
 }
