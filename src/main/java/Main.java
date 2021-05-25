@@ -1,3 +1,5 @@
+import org.la4j.Matrix;
+import org.la4j.matrix.dense.Basic2DMatrix;
 
 public class Main {
     public static void main(String[] args) {
@@ -33,5 +35,10 @@ public class Main {
         var GlineInverted = MatrixWorker.invert(Gline);
         System.out.println("\nInverted G^: ");
         System.out.println(Utils.matrixToString(GlineInverted));
+
+        /* invG^ * G */
+        var GlineTimesG = MatrixWorker.matrixMultiply(GlineInverted, genMatrix);
+        System.out.println("invG^ * G: ");
+        System.out.println(Utils.matrixToString(GlineTimesG));
     }
 }

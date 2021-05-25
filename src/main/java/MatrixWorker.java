@@ -9,14 +9,17 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MatrixWorker {
+
     /* Counting G^ with determinant == k */
     public static List<int[]> computeGline(List<int[]> G) {
         var result = new ArrayList<int[]>();
         int rank = Integer.MIN_VALUE;
+        boolean invertFlag = false;
 
-        while (rank != G.size() && determinant(result) == 0) {
+        while (rank != G.size() && (determinant(result) == 0) || !invertFlag) {
             result = new ArrayList<>();
             var randomized = new ArrayList<Integer>();
+            invertFlag = false;
 
             for (int i = 0; i < G.size(); ++i) {
                 int random = ThreadLocalRandom.current().nextInt(0, G.get(0).length);
@@ -35,8 +38,28 @@ public class MatrixWorker {
             }
 
             rank = MatrixWorker.rankOfMatrix(result);
+
+            if(determinant(result) != 0) {
+                var inverted = invert(result);
+                invertFlag = isUnitMatrix(matrixMultiply(result, inverted));
+            }
         }
         return result;
+    }
+
+    public static boolean isUnitMatrix(List<int[]> matrix) {
+        for (int i = 0; i < matrix.size(); ++i) {
+            for (int j = 0; j < matrix.get(0).length; ++j) {
+                if (i == j) {
+                    if (matrix.get(i)[j] != 1)
+                        return false;
+                } else {
+                    if (matrix.get(i)[j] != 0)
+                        return false;
+                }
+            }
+        }
+        return true;
     }
 
     static void swap(int[][] mat, int row1, int row2, int col) {
@@ -95,27 +118,32 @@ public class MatrixWorker {
 
     /* Matrix invertion */
     public static List<int[]> invert(List<int[]> matrix) {
-        var result = new ArrayList<int[]>();
-
         Matrix source = new Basic2DMatrix(convertTo2DdoubleArray(matrix));
         Matrix inverted = source.withInverter(LinearAlgebra.InverterFactory.GAUSS_JORDAN).inverse();
 
-       for(int i = 0; i < matrix.size(); ++i) {
-           int[] bufRow = new int[matrix.get(0).length];
-           for(int j = 0; j < matrix.get(i).length; ++j)
-               bufRow[j] = ((int)inverted.get(i, j) + 2) % 2;
-           result.add(bufRow);
-       }
+        return convertToList(inverted);
+    }
 
-       return result;
+    /* Convert Matrix to list int matrix */
+    public static List<int[]> convertToList(Matrix matrix) {
+        var result = new ArrayList<int[]>();
+
+        for (int i = 0; i < matrix.rows(); ++i) {
+            int[] bufRow = new int[matrix.columns()];
+            for (int j = 0; j < matrix.columns(); ++j)
+                bufRow[j] = ((int) matrix.get(i, j) + 2) % 2;
+            result.add(bufRow);
+        }
+
+        return result;
     }
 
     /* List<int> matrix to double[][]*/
     public static double[][] convertTo2DdoubleArray(List<int[]> matrix) {
         double[][] result = new double[matrix.size()][matrix.get(0).length];
 
-        for(int i = 0; i < result.length; ++i) {
-            for(int j = 0; j < result[0].length; ++j)
+        for (int i = 0; i < result.length; ++i) {
+            for (int j = 0; j < result[0].length; ++j)
                 result[i][j] = matrix.get(i)[j];
         }
 
@@ -124,10 +152,20 @@ public class MatrixWorker {
 
     /* Calculate determinant */
     public static int determinant(List<int[]> matrix) {
-        if(matrix.size() == 0)
+        if (matrix.size() == 0)
             return 0;
 
         Matrix a = new Basic2DMatrix(convertTo2DdoubleArray(matrix));
-        return (int)a.determinant();
+        return (int) a.determinant();
+    }
+
+    /* Matrix multiplying */
+    public static List<int[]> matrixMultiply(List<int[]> first, List<int[]> second) {
+        Matrix matrix1 = new Basic2DMatrix(convertTo2DdoubleArray(first));
+        Matrix matrix2 = new Basic2DMatrix(convertTo2DdoubleArray(second));
+
+        Matrix result = matrix1.multiply(matrix2);
+
+        return convertToList(result);
     }
 }
