@@ -25,5 +25,7 @@ public class Main {
 
         System.out.println("G^: ");
         System.out.println(Code.genMtoString(Gline));
+
+        System.out.println(MatrixWorker.rankOfMatrix(Gline));
     }
 }

@@ -3,31 +3,31 @@ import java.util.List;
 
 public class Code {
 
-    /* Convert string-polynom into short array polynom */
-    public static short[] stringToArray(String polynom) {
-        short[] result = new short[polynom.length()];
+    /* Convert string-polynom into int array polynom */
+    public static int[] stringToArray(String polynom) {
+        int[] result = new int[polynom.length()];
 
         for(int i = 0; i < result.length; ++i)
-            result[i] = (short) Integer.parseInt(String.valueOf(polynom.charAt(i)));
+            result[i] = (int) Integer.parseInt(String.valueOf(polynom.charAt(i)));
 
         return result;
     }
 
-    /* Convert short array polynom into string-polynom */
-    public static String arrayToString(short[] polynom) {
+    /* Convert int array polynom into string-polynom */
+    public static String arrayToString(int[] polynom) {
         StringBuilder sb = new StringBuilder();
 
-        for(short member : polynom)
+        for(int member : polynom)
             sb.append(member);
 
         return sb.toString();
     }
 
     /* Build generating matrix G(x) */
-    public static List<short[]> buildGenMatrix(short[] polynom, int n) {
-        var result = new ArrayList<short[]>();
+    public static List<int[]> buildGenMatrix(int[] polynom, int n) {
+        var result = new ArrayList<int[]>();
 
-        short[] bufRow = new short[n];
+        int[] bufRow = new int[n];
         System.arraycopy(polynom, 0, bufRow, n - polynom.length, polynom.length);
 
         result.add(bufRow);
@@ -41,26 +41,26 @@ public class Code {
         return result;
     }
 
-    public static String genMtoString(List<short[]> genM) {
+    public static String genMtoString(List<int[]> genM) {
         StringBuilder sb = new StringBuilder();
 
-        for(short[] row : genM)
+        for(int[] row : genM)
             sb.append("[").append(Code.arrayToString(row)).append("]\n");
 
         return sb.toString();
     }
 
-    public static short[] xor(short[] first, short[] second) {
-        short[] result = new short[first.length];
+    public static int[] xor(int[] first, int[] second) {
+        int[] result = new int[first.length];
 
         for(int bit = 0; bit < first.length; ++bit)
-            result[bit] = (short) ((first[bit] + second[bit]) % 2);
+            result[bit] = (int) ((first[bit] + second[bit]) % 2);
 
         return result;
     }
 
-    public static short[] encode(short[] message, List<short[]> genM) {
-        short[] res = new short[genM.get(0).length];
+    public static int[] encode(int[] message, List<int[]> genM) {
+        int[] res = new int[genM.get(0).length];
 
         for(int bit = 0; bit < message.length; ++bit) {
             if(message[bit] == 1)

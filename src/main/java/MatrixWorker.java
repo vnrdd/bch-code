@@ -1,56 +1,13 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MatrixWorker {
-    final static int EPS = Integer.MIN_VALUE;
-
-    public static int computeRank(List<short[]> M) {
-
-        var A = new ArrayList<short[]>();
-
-        for(short[] row : M) {
-            short[] newRow = new short[row.length];
-            System.arraycopy(row, 0, newRow, 0, row.length);
-            A.add(newRow);
-        }
-
-        if (A.size() == 0)
-            return Integer.MIN_VALUE;
-
-        int n = A.size();
-        int m = A.get(0).length;
-
-        int rank = 0;
-        boolean[] row_selected = new boolean[n];
-        for (int i = 0; i < m; ++i) {
-            int j;
-            for (j = 0; j < n; ++j) {
-                if (!row_selected[j])
-                    break;
-            }
-
-            if (j != n) {
-                ++rank;
-                row_selected[j] = true;
-                for (int p = i + 1; p < m; ++p) {
-                    if (A.get(j)[i] != 0)
-                        A.get(j)[p] /= A.get(j)[i];
-                }
-                for (int k = 0; k < n; ++k) {
-                    if (k != j) {
-                        for (int p = i + 1; p < m; ++p)
-                            A.get(k)[p] -= A.get(j)[p] * A.get(k)[i];
-                    }
-                }
-            }
-        }
-        return rank;
-    }
-
-    public static List<short[]> computeGline(List<short[]> G) {
-        var result = new ArrayList<short[]>();
+    /* Counting G^ with determinant == k */
+    public static List<int[]> computeGline(List<int[]> G) {
+        var result = new ArrayList<int[]>();
         int determinant = Integer.MIN_VALUE;
 
         while (determinant != G.size()) {
@@ -67,14 +24,68 @@ public class MatrixWorker {
             Collections.sort(randomized);
 
             for (int i = 0; i < randomized.size(); ++i) {
-                var bufRow = new short[randomized.size()];
+                var bufRow = new int[randomized.size()];
                 for (int j = 0; j < G.size(); ++j)
                     bufRow[j] = G.get(j)[randomized.get(i)];
                 result.add(bufRow);
             }
 
-            determinant = MatrixWorker.computeRank(result);
+            determinant = MatrixWorker.rankOfMatrix(result);
         }
         return result;
+    }
+
+    static void swap(int[][] mat, int row1, int row2, int col) {
+        for (int i = 0; i < col; i++) {
+            int temp = mat[row1][i];
+            mat[row1][i] = mat[row2][i];
+            mat[row2][i] = temp;
+        }
+    }
+
+    /* Matrix rank counting */
+    static int rankOfMatrix(List<int[]> matrix) {
+        int[][] mat = new int[matrix.size()][matrix.get(0).length];
+
+        for (int i = 0; i < matrix.size(); ++i) {
+            System.arraycopy(matrix.get(i), 0, mat[i], 0, matrix.get(0).length);
+        }
+
+        int dim = mat[0].length;
+
+        int rank = dim;
+
+        for (int row = 0; row < rank; row++) {
+            if (mat[row][row] != 0) {
+                for (int col = 0; col < dim; col++) {
+                    if (col != row) {
+                        double mult =
+                                (double) mat[col][row] / mat[row][row];
+
+                        for (int i = 0; i < rank; i++)
+                            mat[col][i] -= mult * mat[row][i];
+                    }
+                }
+            } else {
+                boolean reduce = true;
+                for (int i = row + 1; i < dim; i++) {
+                    if (mat[i][row] != 0) {
+                        swap(mat, row, i, rank);
+                        reduce = false;
+                        break;
+                    }
+                }
+                if (reduce) {
+                    rank--;
+
+                    for (int i = 0; i < dim; i++)
+                        mat[i][row] = mat[i][rank];
+                }
+
+                row--;
+            }
+        }
+
+        return rank;
     }
 }
