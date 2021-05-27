@@ -25,4 +25,11 @@ public class Utils {
 
         return sb.toString();
     }
+
+    public static int vectorWeight(List<int[]> vector) {
+        int count = 0;
+        for(int bit : vector.get(0))
+            count += bit;
+        return count;
+    }
 }

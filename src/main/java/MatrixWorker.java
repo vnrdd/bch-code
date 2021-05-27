@@ -38,7 +38,7 @@ public class MatrixWorker {
                 result.add(bufRow);
             }
 
-            rank = MatrixWorker.rankOfMatrix(result);
+            rank = (new Basic2DMatrix(convertTo2DdoubleArray(result))).rank();
 
             if (determinant(result) != 0) {
                 var inverted = invert(result);
@@ -71,52 +71,6 @@ public class MatrixWorker {
             mat[row1][i] = mat[row2][i];
             mat[row2][i] = temp;
         }
-    }
-
-    /* Matrix rank counting */
-    static int rankOfMatrix(List<int[]> matrix) {
-        int[][] mat = new int[matrix.size()][matrix.get(0).length];
-
-        for (int i = 0; i < matrix.size(); ++i) {
-            System.arraycopy(matrix.get(i), 0, mat[i], 0, matrix.get(0).length);
-        }
-
-        int dim = mat[0].length;
-
-        int rank = dim;
-
-        for (int row = 0; row < rank; row++) {
-            if (mat[row][row] != 0) {
-                for (int col = 0; col < dim; col++) {
-                    if (col != row) {
-                        double mult =
-                                (double) mat[col][row] / mat[row][row];
-
-                        for (int i = 0; i < rank; i++)
-                            mat[col][i] -= mult * mat[row][i];
-                    }
-                }
-            } else {
-                boolean reduce = true;
-                for (int i = row + 1; i < dim; i++) {
-                    if (mat[i][row] != 0) {
-                        swap(mat, row, i, rank);
-                        reduce = false;
-                        break;
-                    }
-                }
-                if (reduce) {
-                    rank--;
-
-                    for (int i = 0; i < dim; i++)
-                        mat[i][row] = mat[i][rank];
-                }
-
-                row--;
-            }
-        }
-
-        return rank;
     }
 
     /* Matrix invertion */
@@ -172,36 +126,56 @@ public class MatrixWorker {
         return convertToList(result);
     }
 
-    public static List<int[]> computeH(List<int[]> Gy, List<Integer> infoSystem) {
+    /* Calculatin Hy */
+    public static List<int[]> makeHy(List<int[]> Gy, List<Integer> infoSystem) {
         var result = new ArrayList<int[]>();
-        final int rows = Gy.get(0).length - infoSystem.size();
 
-        for (int i = 0; i < rows; ++i)
-            result.add(new int[Gy.get(0).length - infoSystem.size()]);
+        var matrixWithoutUnit = new ArrayList<int[]>();
+        for (int i = 0; i < Gy.size(); ++i) {
+            var bufIntArray = new int[Gy.get(0).length - infoSystem.size()];
+            matrixWithoutUnit.add(bufIntArray);
+        }
 
-        for(int i = 0; i < Gy.size(); ++i) {
-            int k = 0;
-            for(int j = 0; j < Gy.get(0).length; ++j) {
-                if(!infoSystem.contains(j)) {
-                    result.get(i)[k] = Gy.get(i)[j];
-                    ++k;
-                }
+        int k = 0;
+        for (int col = 0; col < Gy.get(0).length; ++col) {
+            if (!infoSystem.contains(col)) {
+                for (int row = 0; row < Gy.size(); ++row)
+                    matrixWithoutUnit.get(row)[k] = Gy.get(row)[col];
+                ++k;
             }
         }
 
+        Matrix matrix = new Basic2DMatrix(convertTo2DdoubleArray(matrixWithoutUnit));
+        var transpose = convertToList(matrix.transpose());
 
-//        int k = 0;
-//        for(int col = 0; col < Gy.get(0).length; ++col) {
-//            if(!infoSystem.contains(col) && k < infoSystem.size()) {
-//                for (int row = 0; row < Gy.size(); ++row) {
-//                    int value = Gy.get(row)[col];
-//                    result.get(row)[infoSystem.get(k)] = value;
-//                }
-//                ++k;
-//            }
-//        }
+        for (int i = 0; i < Gy.get(0).length - Gy.size(); ++i) {
+            var bufIntArray = new int[Gy.get(0).length];
+            result.add(bufIntArray);
+        }
 
-        System.out.println(Utils.matrixToString(result));
+        int l = 0;
+        for (int i = 0; i < infoSystem.size(); ++i) {
+            for (int row = 0; row < transpose.size(); ++row)
+                result.get(row)[infoSystem.get(i)] = transpose.get(row)[l];
+            ++l;
+        }
+
+        int m = 0;
+        for (int i = 0; i < Gy.get(0).length; ++i) {
+            if(!infoSystem.contains(i)) {
+                result.get(m)[i] = 1;
+                ++m;
+            }
+        }
+
+        return result;
+    }
+
+    public static double[][] messageToMatrix(int[] message) {
+        var result = new double[1][message.length];
+
+        for(int i = 0; i < message.length; ++i)
+            result[0][i] = message[i];
 
         return result;
     }

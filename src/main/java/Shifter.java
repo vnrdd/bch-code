@@ -1,10 +1,15 @@
-public class Shifter {
-    public static int[] leftShift(int[] source, int shift) {
-        int[] result = new int[source.length];
+import java.util.List;
 
-        if (source.length - 1 >= 0)
-            System.arraycopy(source, 1, result, 0, source.length - 1);
+public class Shifter {
+    public static int[] leftShift(int[] source) {
+        int[] result = new int[source.length];
+        int firstSymbol = source[0];
+
+        System.arraycopy(source, 1, result, 0, source.length - 1);
+
+        result[result.length - 1] = firstSymbol;
 
         return result;
     }
+
 }

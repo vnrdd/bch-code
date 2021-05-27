@@ -1,3 +1,6 @@
+import org.la4j.Matrix;
+import org.la4j.matrix.dense.Basic2DMatrix;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +27,7 @@ public class Code {
 
         int shift = 1;
         while (bufRow[0] != 1) {
-            bufRow = Shifter.leftShift(bufRow, shift);
+            bufRow = Shifter.leftShift(bufRow);
             result.add(bufRow);
         }
 
@@ -49,5 +52,34 @@ public class Code {
         }
 
         return res;
+    }
+
+    /* Syndrome */
+    public static List<int[]> getSyndrome(int[] encoded, List<int[]> Hy, List<Integer> infoSystem) {
+        Matrix msg = new Basic2DMatrix(MatrixWorker.messageToMatrix(encoded));
+        Matrix H = new Basic2DMatrix(MatrixWorker.convertTo2DdoubleArray(Hy));
+        H = H.transpose();
+
+        Matrix res = msg.multiply(H);
+
+        return MatrixWorker.convertToList(res);
+    }
+
+    /* Fixing erros */
+    public static List<int[]> getFixedWord(int[] encoded, List<int[]> Gy, List<Integer> infoSystem) {
+        var by = new ArrayList<int[]>();
+        int[] buf = new int[infoSystem.size()];
+
+        by.add(buf);
+
+        for(int i = 0; i < infoSystem.size(); ++i)
+            by.get(0)[i] = encoded[infoSystem.get(i)];
+
+        Matrix G = new Basic2DMatrix(MatrixWorker.convertTo2DdoubleArray(Gy));
+        Matrix msg = new Basic2DMatrix(MatrixWorker.convertTo2DdoubleArray(by));
+
+        Matrix res = msg.multiply(G);
+
+        return MatrixWorker.convertToList(res);
     }
 }
