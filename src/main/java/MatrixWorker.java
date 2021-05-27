@@ -11,14 +11,15 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatrixWorker {
 
     /* Counting G^ with determinant == k */
-    public static List<int[]> computeGline(List<int[]> G) {
+    public static List<int[]> computeGline(List<int[]> G, List<Integer> infoSystem) {
         var result = new ArrayList<int[]>();
         int rank = Integer.MIN_VALUE;
         boolean invertFlag = false;
+        var randomized = new ArrayList<Integer>();
 
         while (rank != G.size() || (determinant(result) == 0) || !invertFlag) {
             result = new ArrayList<>();
-            var randomized = new ArrayList<Integer>();
+            randomized = new ArrayList<Integer>();
             invertFlag = false;
 
             for (int i = 0; i < G.size(); ++i) {
@@ -33,17 +34,19 @@ public class MatrixWorker {
             for (int i = 0; i < randomized.size(); ++i) {
                 var bufRow = new int[randomized.size()];
                 for (int j = 0; j < G.size(); ++j)
-                    bufRow[j] = G.get(j)[randomized.get(i)];
+                    bufRow[j] = G.get(i)[randomized.get(j)];
                 result.add(bufRow);
             }
 
-            rank = MatrixWorker.rankOfMatrix(result);
+            rank = (new Basic2DMatrix(convertTo2DdoubleArray(result))).rank();
 
-            if(determinant(result) != 0) {
+            if (determinant(result) != 0) {
                 var inverted = invert(result);
                 invertFlag = isUnitMatrix(matrixMultiply(result, inverted));
             }
         }
+
+        infoSystem.addAll(randomized);
         return result;
     }
 
@@ -68,52 +71,6 @@ public class MatrixWorker {
             mat[row1][i] = mat[row2][i];
             mat[row2][i] = temp;
         }
-    }
-
-    /* Matrix rank counting */
-    static int rankOfMatrix(List<int[]> matrix) {
-        int[][] mat = new int[matrix.size()][matrix.get(0).length];
-
-        for (int i = 0; i < matrix.size(); ++i) {
-            System.arraycopy(matrix.get(i), 0, mat[i], 0, matrix.get(0).length);
-        }
-
-        int dim = mat[0].length;
-
-        int rank = dim;
-
-        for (int row = 0; row < rank; row++) {
-            if (mat[row][row] != 0) {
-                for (int col = 0; col < dim; col++) {
-                    if (col != row) {
-                        double mult =
-                                (double) mat[col][row] / mat[row][row];
-
-                        for (int i = 0; i < rank; i++)
-                            mat[col][i] -= mult * mat[row][i];
-                    }
-                }
-            } else {
-                boolean reduce = true;
-                for (int i = row + 1; i < dim; i++) {
-                    if (mat[i][row] != 0) {
-                        swap(mat, row, i, rank);
-                        reduce = false;
-                        break;
-                    }
-                }
-                if (reduce) {
-                    rank--;
-
-                    for (int i = 0; i < dim; i++)
-                        mat[i][row] = mat[i][rank];
-                }
-
-                row--;
-            }
-        }
-
-        return rank;
     }
 
     /* Matrix invertion */
@@ -167,5 +124,59 @@ public class MatrixWorker {
         Matrix result = matrix1.multiply(matrix2);
 
         return convertToList(result);
+    }
+
+    /* Calculatin Hy */
+    public static List<int[]> makeHy(List<int[]> Gy, List<Integer> infoSystem) {
+        var result = new ArrayList<int[]>();
+
+        var matrixWithoutUnit = new ArrayList<int[]>();
+        for (int i = 0; i < Gy.size(); ++i) {
+            var bufIntArray = new int[Gy.get(0).length - infoSystem.size()];
+            matrixWithoutUnit.add(bufIntArray);
+        }
+
+        int k = 0;
+        for (int col = 0; col < Gy.get(0).length; ++col) {
+            if (!infoSystem.contains(col)) {
+                for (int row = 0; row < Gy.size(); ++row)
+                    matrixWithoutUnit.get(row)[k] = Gy.get(row)[col];
+                ++k;
+            }
+        }
+
+        Matrix matrix = new Basic2DMatrix(convertTo2DdoubleArray(matrixWithoutUnit));
+        var transpose = convertToList(matrix.transpose());
+
+        for (int i = 0; i < Gy.get(0).length - Gy.size(); ++i) {
+            var bufIntArray = new int[Gy.get(0).length];
+            result.add(bufIntArray);
+        }
+
+        int l = 0;
+        for (int i = 0; i < infoSystem.size(); ++i) {
+            for (int row = 0; row < transpose.size(); ++row)
+                result.get(row)[infoSystem.get(i)] = transpose.get(row)[l];
+            ++l;
+        }
+
+        int m = 0;
+        for (int i = 0; i < Gy.get(0).length; ++i) {
+            if(!infoSystem.contains(i)) {
+                result.get(m)[i] = 1;
+                ++m;
+            }
+        }
+
+        return result;
+    }
+
+    public static double[][] messageToMatrix(int[] message) {
+        var result = new double[1][message.length];
+
+        for(int i = 0; i < message.length; ++i)
+            result[0][i] = message[i];
+
+        return result;
     }
 }
