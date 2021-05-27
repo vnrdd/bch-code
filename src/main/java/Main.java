@@ -44,20 +44,22 @@ public class Main {
 
         /* invG^ * G */
         var Gy = MatrixWorker.matrixMultiply(GlineInverted, genMatrix);
-        System.out.println("Gy: ");
+        System.out.println("\nGy: ");
         System.out.println(Utils.matrixToString(Gy));
 
 
         /* Hy */
         var Hy = MatrixWorker.makeHy(Gy, infoSystem);
-        System.out.println("Hy: ");
+        System.out.println("\nHy: ");
         System.out.println(Utils.matrixToString(Hy));
+
+        int[] initEncoded = encoded.clone();
 
         encoded[2] ^= 1;
         encoded[3] ^= 1;
 
         var syndrome = Code.getSyndrome(encoded, Hy, infoSystem);
-        System.out.println("Syndrome: " + Utils.matrixToString(syndrome));
+        System.out.println("\nSyndrome: " + Utils.matrixToString(syndrome));
 
         int shifted = 0;
         while (Utils.vectorWeight(syndrome) > s) {
@@ -68,14 +70,13 @@ public class Main {
             System.out.println("Syndrome: " + Utils.matrixToString(syndrome));
         }
 
-        var fixedWord = Code.getFixedWord(encoded, Gy, infoSystem);
-        System.out.println(Utils.matrixToString(fixedWord));
-
-        var fixedWordArray = fixedWord.get(0);
+        var fixedWord = Code.getFixedWord(encoded, Gy, infoSystem).get(0);
 
         for (int i = 0; i < n - shifted; ++i)
-            fixedWordArray = Shifter.leftShift(fixedWordArray);
+            fixedWord = Shifter.leftShift(fixedWord);
 
-        System.out.println(Arrays.toString(fixedWordArray));
+        System.out.println("\nFixed-errors word: " + Arrays.toString(fixedWord));
+        System.out.println("No-errors word: " + Arrays.toString(initEncoded));
+        System.out.println("Is equals?: " + Arrays.equals(fixedWord, initEncoded));
     }
 }
