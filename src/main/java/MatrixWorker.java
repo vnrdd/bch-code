@@ -11,14 +11,15 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatrixWorker {
 
     /* Counting G^ with determinant == k */
-    public static List<int[]> computeGline(List<int[]> G) {
+    public static List<int[]> computeGline(List<int[]> G, List<Integer> infoSystem) {
         var result = new ArrayList<int[]>();
         int rank = Integer.MIN_VALUE;
         boolean invertFlag = false;
+        var randomized = new ArrayList<Integer>();
 
         while (rank != G.size() || (determinant(result) == 0) || !invertFlag) {
             result = new ArrayList<>();
-            var randomized = new ArrayList<Integer>();
+            randomized = new ArrayList<Integer>();
             invertFlag = false;
 
             for (int i = 0; i < G.size(); ++i) {
@@ -33,17 +34,19 @@ public class MatrixWorker {
             for (int i = 0; i < randomized.size(); ++i) {
                 var bufRow = new int[randomized.size()];
                 for (int j = 0; j < G.size(); ++j)
-                    bufRow[j] = G.get(j)[randomized.get(i)];
+                    bufRow[j] = G.get(i)[randomized.get(j)];
                 result.add(bufRow);
             }
 
             rank = MatrixWorker.rankOfMatrix(result);
 
-            if(determinant(result) != 0) {
+            if (determinant(result) != 0) {
                 var inverted = invert(result);
                 invertFlag = isUnitMatrix(matrixMultiply(result, inverted));
             }
         }
+
+        infoSystem.addAll(randomized);
         return result;
     }
 
@@ -167,5 +170,39 @@ public class MatrixWorker {
         Matrix result = matrix1.multiply(matrix2);
 
         return convertToList(result);
+    }
+
+    public static List<int[]> computeH(List<int[]> Gy, List<Integer> infoSystem) {
+        var result = new ArrayList<int[]>();
+        final int rows = Gy.get(0).length - infoSystem.size();
+
+        for (int i = 0; i < rows; ++i)
+            result.add(new int[Gy.get(0).length - infoSystem.size()]);
+
+        for(int i = 0; i < Gy.size(); ++i) {
+            int k = 0;
+            for(int j = 0; j < Gy.get(0).length; ++j) {
+                if(!infoSystem.contains(j)) {
+                    result.get(i)[k] = Gy.get(i)[j];
+                    ++k;
+                }
+            }
+        }
+
+
+//        int k = 0;
+//        for(int col = 0; col < Gy.get(0).length; ++col) {
+//            if(!infoSystem.contains(col) && k < infoSystem.size()) {
+//                for (int row = 0; row < Gy.size(); ++row) {
+//                    int value = Gy.get(row)[col];
+//                    result.get(row)[infoSystem.get(k)] = value;
+//                }
+//                ++k;
+//            }
+//        }
+
+        System.out.println(Utils.matrixToString(result));
+
+        return result;
     }
 }
